@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#344936" />
+    <title>小物之森 · 3D 纪念品店</title>
+    <meta
+      name="description"
+      content="走进一间装满彩色纸雕、陶器和个人旅行纪念品的小店，每件小物都能拿起端详。"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%238b4f2e'/%3E%3Cpath d='M16 24h32v25H16zM12 18h40v9H12zM32 18v31' fill='none' stroke='%23fff8e9' stroke-width='3'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main id="game" aria-label="可探索的三维纪念品商店">
+      <canvas
+        id="world"
+        tabindex="0"
+        aria-label="拖动环顾，WASD 移动，点击纪念品拿起查看"
+      ></canvas>
+      <div id="travel-veil" aria-hidden="true"></div>
+      <div id="loading" class="loading">
+        <div class="loading-mark">小物之森</div>
+        <p id="load-status">正在打开店门…</p>
+        <div class="load-track"><i id="load-bar"></i></div>
+      </div>
+      <header class="hud header">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">◈</span>
+          <div>
+            <h1>小物之森</h1>
+            <p>THE LITTLE THINGS</p>
+          </div>
+          <span class="brand-divider"></span><span class="mode">3D 漫游</span>
+        </div>
+        <div class="toolbar">
+          <button id="collection-btn" class="glass-button collection-trigger">
+            旅途系列 <span id="collection-count">0</span></button
+          ><button id="reference-btn" class="glass-button">参考照片</button
+          ><button id="help-btn" class="icon-button" aria-label="操作说明">
+            ?</button
+          ><button id="fullscreen-btn" class="icon-button" aria-label="全屏">
+            ⛶
+          </button>
+        </div>
+      </header>
+      <div class="hud place">
+        <span class="eyebrow">A FOREST OF LITTLE THINGS</span>
+        <h2 id="place-title">把旅途开成一间店</h2>
+        <p id="place-copy">抬头与回望，都是你的旅途。</p>
+      </div>
+      <div id="target" class="target" hidden>
+        <span id="target-name"></span
+        ><small id="target-action">点击拿起 · E</small>
+      </div>
+      <div id="crosshair" aria-hidden="true"></div>
+      <div class="hud bottom">
+        <nav class="zones" aria-label="前往店内区域">
+          <button data-zone="overview" class="active">店门口</button
+          ><button data-zone="memories">旅行纪念品</button
+          ><button data-zone="photobook">旅行画册</button
+          ><button data-zone="crafts">旅途造物</button
+          ><button data-zone="cards">旅行明信片</button
+          ><button data-zone="ceiling">抬头看看</button
+          ><button data-zone="back">窗边</button>
+        </nav>
+        <div class="controls-hint">
+          <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动</span
+          ><i></i><span>拖动 环顾</span><i></i><span>点击 拿起</span>
+        </div>
+        <p class="source-note">没有时间限制，慢慢逛。</p>
+      </div>
+      <div id="touch-controls" class="touch-controls" aria-label="移动控制">
+        <div id="joystick" aria-label="拖动摇杆移动"><i id="stick"></i></div>
+        <button id="touch-pick" aria-label="拿起眼前物品">拿起</button>
+      </div>
+      <div id="toast" role="status" aria-live="polite"></div>
+    </main>
+    <dialog id="inspector" aria-labelledby="object-title">
+      <canvas id="object-view" aria-label="拖动旋转纪念品，滚轮缩放"></canvas>
+      <div class="inspect-top">
+        <span class="eyebrow">A CLOSER LOOK</span
+        ><button id="close-inspect" class="glass-button">
+          ← 放回原位 <kbd>Esc</kbd>
+        </button>
+      </div>
+      <aside class="object-info">
+        <span id="object-category" class="eyebrow"></span>
+        <h2 id="object-title"></h2>
+        <span id="object-origin" class="origin-badge"></span>
+        <p id="object-description"></p>
+        <div class="detail-rule"></div>
+        <dl>
+          <div>
+            <dt>所在区域</dt>
+            <dd id="object-zone"></dd>
+          </div>
+          <div>
+            <dt>外观材质</dt>
+            <dd id="object-material"></dd>
+          </div>
+        </dl>
+        <figure class="source-preview">
+          <div id="object-source"></div>
+          <figcaption>来自这张照片</figcaption>
+        </figure>
+        <p class="detail-note" id="object-detail-note">
+          正面图案取自实拍，背面与厚度为近似重建。
+        </p>
+      </aside>
+      <div class="inspect-bottom">
+        <span>拖动 / 方向键旋转 · 滚轮缩放</span>
+        <div>
+          <button id="zoom-out" class="icon-button" aria-label="缩小">−</button
+          ><button id="inspect-bottom-view" class="glass-button">看底部</button
+          ><button id="reset-object" class="glass-button">重置视角</button
+          ><button id="zoom-in" class="icon-button" aria-label="放大">
+            ＋
+          </button>
+        </div>
+      </div>
+    </dialog>
+    <dialog id="help" class="small-dialog" aria-labelledby="help-title">
+      <button class="dialog-close" data-close="help" aria-label="关闭">×</button
+      ><span class="eyebrow">WELCOME INSIDE</span>
+      <h2 id="help-title">慢慢逛，自在看。</h2>
+      <div class="help-row">
+        <strong>走动</strong><span>WASD / 方向键；手机拖动左下摇杆</span>
+      </div>
+      <div class="help-row">
+        <strong>环顾</strong><span>拖动空白处；Q / R 抬头与低头</span>
+      </div>
+      <div class="help-row">
+        <strong>拿起</strong><span>点击物品，或对准后按 E</span>
+      </div>
+      <div class="help-row">
+        <strong>端详</strong><span>拖动旋转、滚轮缩放，Esc 放回</span>
+      </div>
+      <p class="help-note">
+        拖动环顾，点击纪念品拿起查看。在旅途系列里可以直接选择个人作品。
+      </p>
+      <button data-close="help" class="primary-button">继续逛店</button>
+    </dialog>
+    <dialog
+      id="reference"
+      class="reference-dialog"
+      aria-labelledby="reference-title"
+    >
+      <div class="reference-head">
+        <div>
+          <span class="eyebrow">THE ORIGINAL ROOM</span>
+          <h2 id="reference-title">这间店，从这里开始</h2>
+        </div>
+        <button
+          class="icon-button"
+          data-close="reference"
+          aria-label="关闭参考照片"
+        >
+          ×
+        </button>
+      </div>
+      <img
+        id="reference-image"
+        alt="重建参考：悬挂彩色纸雕、木质陈列桌和深色墙面的礼品店"
+      />
+      <p>你提供的店铺参考照片</p>
+    </dialog>
+    <dialog
+      id="collection"
+      class="collection-dialog"
+      aria-labelledby="collection-title"
+    >
+      <div class="collection-head">
+        <div>
+          <span class="eyebrow">FIELD NOTES / PERSONAL COLLECTION</span>
+          <h2 id="collection-title">把旅途带回家</h2>
+          <p>照片里的片刻，变成可以拿起的纪念品。</p>
+        </div>
+        <button
+          class="icon-button"
+          data-close="collection"
+          aria-label="关闭旅途系列"
+        >
+          ×
+        </button>
+      </div>
+      <div id="collection-grid" class="collection-grid"></div>
+    </dialog>
+    <dialog id="book-reader" aria-label="个人画册 · 翻页阅读">
+      <header class="reader-toolbar">
+        <button id="close-reader" class="glass-button" type="button">
+          ← 返回纪念品店</button
+        ><span>Esc 退出阅读</span>
+      </header>
+      <div class="reader-content">
+        <iframe id="book-frame" title="个人画册"></iframe>
+        <div id="reader-loading" class="reader-loading" role="status">
+          正在打开画册…
+        </div>
+      </div>
+    </dialog>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

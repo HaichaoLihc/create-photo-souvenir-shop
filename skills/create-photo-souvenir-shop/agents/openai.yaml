@@ -1,0 +1,4 @@
+interface:
+  display_name: "Photo Souvenir Shop"
+  short_description: "Turn personal photos into a rich 3D gift shop"
+  default_prompt: "Use $create-photo-souvenir-shop to turn my photos into a personal 3D souvenir shop."
