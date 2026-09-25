@@ -19,9 +19,15 @@ const $ = (id) => document.getElementById(id);
 document.title = COLLECTION.title;
 document.querySelector("h1").textContent = COLLECTION.title;
 document.querySelector(".loading-mark").textContent = COLLECTION.title;
-document.querySelector('[data-zone="photobook"]').hidden = !COLLECTION.book;
-document.querySelector('[data-zone="crafts"]').hidden =
-  !COLLECTION.crafts.length;
+for (const button of document.querySelectorAll("[data-zone]")) {
+  const zone = ZONES[button.dataset.zone];
+  button.hidden = !zone;
+  if (zone) button.textContent = zone.label || zone.title;
+}
+document.querySelector(".brand p").textContent =
+  COLLECTION.scene.subtitle || "PHOTO SOUVENIRS";
+document.querySelector(".place .eyebrow").textContent =
+  COLLECTION.scene.subtitle || "COLLECTED MOMENTS";
 $("reference-btn").hidden = !COLLECTION.reference;
 if (COLLECTION.reference) $("reference-image").src = COLLECTION.reference;
 const canvas = $("world");
@@ -93,17 +99,23 @@ async function init() {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.03;
+    renderer.toneMappingExposure = COLLECTION.scene.lighting?.exposure ?? 1.03;
     world = new THREE.Scene();
-    world.background = new THREE.Color("#3b4438");
-    world.fog = new THREE.Fog("#7d8271", 16, 30);
+    world.background = new THREE.Color(COLLECTION.scene.room.wall);
+    world.fog = new THREE.Fog(COLLECTION.scene.room.wall, 24, 48);
     camera = new THREE.PerspectiveCamera(
       62,
       innerWidth / innerHeight,
       0.04,
       40,
     );
-    camera.position.set(-0.84, 1.67, 4.85);
+    const entry = ZONES.overview;
+    camera.position.set(...entry.pos);
+    const direction = new THREE.Vector3(...entry.target).sub(camera.position);
+    yaw = Math.atan2(-direction.x, -direction.z);
+    pitch = Math.atan2(direction.y, Math.hypot(direction.x, direction.z));
+    $("place-title").textContent = entry.title;
+    $("place-copy").textContent = entry.copy;
     setCamera();
     const sources = TEXTURE_SOURCES;
     const loader = new THREE.TextureLoader();
@@ -137,7 +149,7 @@ async function init() {
     world.add(shop.room);
     environmentTarget = createShopEnvironment(renderer);
     world.environment = environmentTarget.texture;
-    world.environmentIntensity = 0.39;
+    world.environmentIntensity = COLLECTION.scene.lighting?.environment ?? 0.39;
     shopSun = lightShop(world);
     outline = new THREE.Box3Helper(
       new THREE.Box3(),
@@ -305,6 +317,23 @@ function positionInspection() {
   heldClone.scale.setScalar(zoom);
   inspectCamera.position.z = mobile ? 4.5 : 3.2;
 }
+function hasInspectableBack(d) {
+  return (
+    [
+      "keychain",
+      "magnet",
+      "pin",
+      "pins",
+      "postcard",
+      "postcards",
+      "wall-art",
+      "print",
+      "notebook",
+      "journal",
+    ].includes(d.family || d.kind) ||
+    (d.sculpted && d.kind !== "mug")
+  );
+}
 function inspect(obj) {
   if (!obj || inspecting || !inspectScene) return;
   if (obj.userData.definition.reader) {
@@ -347,8 +376,9 @@ function inspect(obj) {
   $("object-description").textContent = def.description;
   $("object-zone").textContent = def.zone;
   $("object-material").textContent = def.material;
-  $("inspect-bottom-view").textContent =
-    def.sculpted && def.kind !== "mug" ? "看背面" : "看底部";
+  $("inspect-bottom-view").textContent = hasInspectableBack(def)
+    ? "看背面"
+    : "看底部";
   const related = !!(def.tripRelated || def.personal),
     sourcePanel = document.querySelector(".source-preview");
   sourcePanel.hidden = !related;
@@ -461,7 +491,7 @@ function changeZoom(delta) {
 }
 $("inspect-bottom-view").onclick = () => {
   const d = held?.userData.definition;
-  const back = d?.sculpted && d.kind !== "mug";
+  const back = d && hasInspectableBack(d);
   inspectOrbit.pitch = back ? 0.08 : -Math.PI / 2;
   inspectOrbit.yaw = back ? Math.PI : 0;
 };

@@ -1,27 +1,42 @@
-# Runtime map
+# Runtime
 
-The template is under `assets/html/`. Serve it with any static HTTP server; it contains fictional geometric SVG examples and no personal photographs. Do not use `file://`, because browsers restrict local ES modules.
+`assets/html/` supplies local Three.js, navigation, picking and inspection. Preserve those interactions; author the space and products. The fixture library and default lighting are starting points, not an architectural or aesthetic ceiling: extend `buildRoom`, fixtures, materials and `lighting.js` when the authored design requires it, keeping bounds/collision in sync. Serve over HTTP. Keep the Three.js license.
 
-| File | Responsibility |
-| --- | --- |
-| `collection.js` | Generated portable catalog; the normal customization boundary |
-| `main.js` | Renderer, input, raycasting, inspection and collection tray |
-| `gallery.js` | Room, furnishings and merchandise placements |
-| `personal.js`, `mug.js` | Ten featured gift families, silhouettes and hollow mugs |
-| `sculpted-crafts.js` | Optional motif-based sculptures and hardware |
-| `trip-art.js` | Source provenance, artwork selection and postcard ordering |
-| `trip-book.js`, `book-reader.js` | Original-cover model, lazy iframe, close/focus lifecycle |
-| `texture-sources.js` | GPU-loaded art, atlas and optional book textures |
-| `materials.js`, `lighting.js` | Cached materials and warm lighting |
-| `navigation.js`, `settings.js` | Viewpoints, collisions and shared keyboard/touch speed |
-| `optimize.js`, `instances.js` | Merge/batch while preserving individual item identity |
+- `gallery.js`: registered products and placements.
+- `fixtures.js`: room and fixture primitives. Extend for a different architecture.
+- `personal.js`, `extended-products.js`: base product geometry.
+- `custom-shop.js`: custom products and architectural details.
+- `navigation.js`, `lighting.js`: authored views, collision and lights.
+- `main.js`: input, picking and object inspection.
 
-The floor plan uses roughly meter-like units: x across the aisle, y up, z along the shop. Ceiling y≈3.25. The stable left-shelf book position is intentional. All object makers return geometry under a group registered by `object()` in `gallery.js`. Add pickable merchandise through that function, not as anonymous room meshes. Keep `definition.sourcePhoto` and actual artwork/model derivation in sync.
+## Custom products
 
-To add a sculptural motif, implement its geometry in `sculpted-crafts.js`, add a branch in `buildCraft`, and register its slug/kind in `scripts/build_shop.py`'s `MODELS`. Use the existing three-column cabinet: at most three designs per kind. Include real depth, rear fastening/hardware and open mug cavities. Validate bounds, visibility and raycast access; a pretty isolated model can still be hidden behind a shelf. If adding a fourth item of a kind, extend placement logic first. Do not silently reuse a different subject's model.
+Supply a local `.js` file as `customModule`; it replaces `custom-shop.js`. Export both hooks below. A `kind:"custom"` gift selects a maker with `model`. **Plate, dish, tablecloth and pen currently need agent-authored makers**; they are not finished built-in products. Give each its own `id` and `model`.
 
-When changing geometry or instancing, rerun `validate_shop.mjs`. Mesh clones used for inspection must be on render layer 0, and temporarily hiding one instance must not hide all copies. Transparent ornament hit testing and frozen shadows are performance-sensitive. The reader checks both origin and iframe source for Esc messages, retains its loaded page, and restores focus after closing.
+```js
+export function buildCustomProduct(group, definition, textures) {
+  // Dispatch on definition.model; add finished geometry under group.
+  // Available: definition.sourcePhoto, definition.artIndex, definition.color.
+  // Artwork: textures['art-' + definition.artIndex].
+  // Mark genuinely source-derived, unprinted meshes with:
+  // mesh.userData.sourcePhoto = definition.sourcePhoto;
+  // Return true when built, false for an unsupported model.
+  return false;
+}
+export function decorateShop({ room, colliders, fixtures, textures, collection }) {
+  // Optional architecture. Register floor obstacles: {x,z,w,d,rotation} or {x,z,r}.
+}
+```
 
-Runtime uses no network dependencies. Keep `THREE-LICENSE.txt` with the vendored Three.js files. Never reformat vendored code merely to match application style. Node 22+ is used for scene validation; Python 3.10+ plus Pillow for source preparation/building. Optional `pillow-heif` is needed for HEIC on systems without `sips`.
+Import local helpers from `./materials.js` and Three.js from `./assets/three.module.js`. The importer copies one custom module; include image assets through the manifest. Registered gifts receive picking, provenance and inspection automatically. Anonymous merchandise added in `decorateShop` does not.
 
-Validation is intentionally CPU-side and cannot certify colors, GPU compatibility or animation smoothness. Report only checks actually performed. A generated artwork requires visual inspection even if every automated check passes.
+Keep product bottoms near local y=0 and account for bounds when placing them. The wall-art maker is `print`; rotate/place it against a wall. Model tablecloth geometry around its intended table dimensions and include hanging edges in its bounds. Mesh provenance tags record a claim; visually verify the source relationship.
+
+The CPU validator checks assets, geometry, sources, navigation connectivity, picking and instance identity. It does not certify appearance or completeness of the eleven-item assortment: check that list explicitly before delivery. Inspection clones stay on layer 0; hiding one instance must not hide its siblings. Runtime needs no backend or CDN.
+
+
+## Finished models and visual evidence
+
+See [quality workflow](quality-workflow.md) for the pilot, `craft.js` fabrication helpers, custom dispatch for every gift kind, reusable module packaging and the actual-model renderer. `render_review.mjs` renders the built site's scene and every distinct item from four directions/treatments. `audit_collection.py --final` checks the current build against that evidence and assortment requirements; it always leaves visual judgment to the reviewer. Geometry validation alone is insufficient. Avoid output-only runtime edits: use a manifest `model`, `customModule` and explicit `customFiles` so the next rebuild retains the work.
+
+The runtime validator reports `postcardDesigns` across both custom postcard gifts and `card-N` placements, deduplicated by artwork. `authoredModels` counts unique placed gift types using custom makers. The retained legacy `uniquePostcards` field counts only `card-N` wall placements and may be zero in a fully authored postcard collection; use the canonical family audit for assortment totals.

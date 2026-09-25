@@ -1,4 +1,4 @@
 interface:
   display_name: "Photo Souvenir Shop"
-  short_description: "Turn personal photos into a rich 3D gift shop"
-  default_prompt: "Use $create-photo-souvenir-shop to turn my photos into a personal 3D souvenir shop."
+  short_description: "Create a stocked photo-led shop with eleven gift types"
+  default_prompt: "Use $create-photo-souvenir-shop to turn my photos into a stocked shop with rich, genuinely distinct designs across all eleven gift types. View the bundled shop references and use architectural/interior-design knowledge to compose an original space with balanced asymmetry, varied display groups, color rhythm, credible construction and directional layered light. For stylized art, use actual photo-referenced image generation. First finish and visually review a small pilot, then scale to the full assortment. Use the fabrication components and inspect rendered front, oblique, back and clay views. Inspect every finished design for similarity and remake near-duplicates; do not count image swaps as new designs or economize on the work needed for variety."

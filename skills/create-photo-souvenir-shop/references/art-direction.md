@@ -1,26 +1,23 @@
-# From an observed photograph to a keepsake
+# Product design
 
-First write a small source map: photo ID → observable detail → design idea → product/material. Example: a striped beach umbrella in `p0004` → its off-center red triangle and sand-colored shadow → a layered enamel pin. An image of friends on a path → the rhythm of their silhouettes → a small cut-paper postcard. Keep emotional captions modest unless the user supplies the story.
+For each required item, connect a visible photo detail to a physical design: source → motif → shape/material → artwork. Use the fixed eleven-item list in `SKILL.md`; do not substitute easier categories.
 
-Build a family, not a sheet of unrelated filters. Choose 3–5 main colors, one paper tone and compatible typography. Split a substantial photo collection across media such as two-color risograph, cut paper, woodcut, pencil, restrained gouache, collage and geometric composition. Change framing, negative space and typography as well as medium. Prefer varied source images before making variants of one photograph. Review faces and recognizable details against the originals.
+- Simplify a distinctive silhouette for a keychain, magnet or badge; model its edge and fastening.
+- Compose postcard, wall-art and notebook graphics for their different proportions. Preserve recognizable people and details when they are used.
+- Design plate and dish as different sizes/forms, with shallow cavities and rims. Pattern placement should follow their surfaces.
+- Recompose photo-derived colors and motifs into a textile pattern. A tablecloth must lie on a table and hang over its edges.
+- Give the pen a proper tip and clip/cap; use a motif on its barrel or a small shaped finial. Coasters need real thickness and material.
 
-For ten initial families:
+Different designs need substantive differences in form and treatment, not only different photo-derived motifs. A new picture on the same charm/plate/notebook is a variant, not a new design. Apply the two-difference rule in `SKILL.md`. For example, source-compatible keychains can explore relief, sculpted charms, layered silhouettes and multi-part assemblies; plates can vary profile, rim, outline and surface technique. These are possibilities, not another fixed template. A small photo set can support genuinely different treatments without invented memories.
 
-| Family | Design opportunity | Physical details |
-| --- | --- | --- |
-| Postcards | A composed illustration with a quiet margin; one memorable moment per card | Paper thickness and reverse |
-| Magnet | Layered landscape or an object silhouette | Back magnets, beveled edge |
-| Keychain | One distinctive shape plus a small secondary charm | Split ring, linked chain, thickness |
-| Desk mat | Wider crop, abstract pattern or an illustrated route | Soft edge, fabric surface |
-| Mug | Wraparound graphic with a color-derived interior | Open cavity, rim, handle |
-| Coasters | Four related moments or color studies | Cork underside, ceramic edge |
-| Tote | A simple large motif readable at a distance | Fabric body and two handles |
-| Pins | Bold simplified contour, two or three enamel areas | Metal border, clasp on reverse |
-| Stickers | A small family of isolated moments | Separate cut shapes and backing |
-| Journal | A restrained cover and a contrasting cloth spine | Visible page edges |
+Merchandise in composed groups: occupied keychain hooks, magnets/badges in shallow trays, staggered plate/dish stacks with visible faces, fanned postcards, flat and upright notebooks, pen holders and coaster sets. Vary group height, depth, spacing and orientation with purpose; balance a denser group with a quieter patch. Local racks can have orderly rows, but do not apply one grid or random jitter across the shop. Copies provide stock depth, not design variety. Keep examples of every design visible and accessible; follow the spatial guidance in `shop-design.md`.
 
-The bundled personal models are a working base. Add source-derived contour/relief for the hero keychain, magnet and pin instead of stopping at a rectangular image patch. `outline` in the manifest changes their real extruded geometry. For richer sculpture, select a relevant model or add a new maker following the runtime guide; update the builder's model whitelist and validate its scene bounds.
+Built-in geometry is a starting point. Customize or replace it when its shape does not express the source. Do not present raw primitives as finished products.
 
-For ImageGen, separate **flat print art**, **transparent ornament atlas** and **product concept mockups**. Ask for a 4×4 transparent atlas only when creating ceiling cutouts; map every cell to its reviewed source ID. The fallback hangs the finished prints themselves. Product mockup shadows and packaging should not be printed on an object's surface.
+For image generation, pass the reviewed photo references. Generate flat artwork, patterns or transparent cutouts separately from concept mockups. Inspect the actual results. Atlas cropping with `split_atlas.py` is optional; never print an entire product board on one object. Keep all eleven designs coherent without pasting the same image onto every surface.
 
-The room is intentionally rich: hanging paper at different depths, a floor-to-ceiling collection wall and small ceramics. Keep decorative filler subordinate to the user's collection. A measured 70% object ratio is a guardrail; the most visible and most distinctive objects should also feel personal.
+## Final variety check
+
+1. View **every finished design** together by category in front and oblique views, at comparable scale. Use rendered models from the actual shop, not concept art. Also inspect solid objects with image textures and labels hidden to expose repeated geometry.
+2. Compare each design with its closest-looking sibling. Identify at least two visible design differences under the rule in `SKILL.md`. If removing the picture/color leaves a dozen identical solid objects, that category fails. For flat goods, compare the actual composition, format and treatment; a renamed file or changed photo is insufficient. IDs, image hashes and provenance checks cannot establish visual variety.
+3. Merge or exclude near-duplicates from the design count, then author genuinely different replacements until quantities and variety both pass. Recheck replacements beside the full category. Repeated inventory keeps the same design ID and is counted only as stock; do not let copies dominate the shop and disguise too few designs. Do not lower this standard to save generation or modeling effort.

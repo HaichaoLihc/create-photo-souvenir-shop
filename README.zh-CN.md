@@ -7,10 +7,12 @@
 ## 能做什么
 
 - 用大幅联系表逐张查看照片，记录来源和可辨认的记忆元素。
-- 支持明信片、冰箱贴、钥匙链、桌垫、杯子、杯垫、帆布袋、徽章、贴纸、手账十类礼品。
-- 主墙可陈列最多 100 幅不同作品；默认至少 70% 陈列物品与提供的照片有关。
-- 包含暖色木质陈列、深橄榄色墙面、120 件悬挂纸饰、键盘与触摸移动、物件旋转缩放。
-- 可添加照片主题匹配的立体造物、自定义轮廓，以及保留原封面的翻页画册。画册放在左侧书架，点击打开 2D 阅读界面。
+- 必做 11 类：钥匙链、冰箱贴、小徽章、明信片、盘子、碟子、挂画、桌布、小笔记本、笔、杯垫；造型、图案和材质由照片决定。
+- 支持最多 100 幅作品素材，按空间需要选择陈列；默认至少 70% 商品由照片衍生。
+- 每类包含多款设计和成组库存，例如钥匙链 12–18 款、陈列 24–36 件；盘子 8–12 款、陈列 16–24 件。
+- Agent 根据照片自主设计房间比例、装修材质、陈列布局、灯光与视点；内附五张真实店铺参考原图，要求实际查看、借鉴并重新设计，保存的随机种子支持复现。保留键盘与触摸移动、物件旋转缩放。
+- 先做品质样板再扩展全店；风格化图片实际调用图像生成工具，立体小物复用珐琅、金属连接件、浮雕等精细构造。自动输出正面、侧面、背面和无贴图模型联系表。
+- 可添加照片主题匹配的立体造物、自定义轮廓，以及保留原封面的翻页画册。画册位置由布局决定，点击打开 2D 阅读界面。
 
 仓库示例使用 **24 幅虚构几何 SVG 图案**，没有个人照片或照片衍生的位图作品。Skill 自带运行模板，可以独立安装。
 
@@ -30,12 +32,14 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
 ```text
 用 $create-photo-souvenir-shop 查看 /path/to/photos 里的所有照片，
 做一个属于这些照片的 3D 纪念品店。先看完照片，再设计风格化明信片、
-有创意的钥匙链、杯子、冰箱贴和徽章。
+钥匙链、冰箱贴、小徽章、盘子、碟子、挂画、桌布、小笔记本、笔和杯垫。
 ```
 
 图片生成由 Agent 调用当前可用的图像工具完成；Python 构建脚本负责整理素材和生成网站。也可以使用已有的设计成品。网站运行不需要 API key、数据库、CDN 或构建工具，默认只在本地预览。
 
-详细说明：[Skill](skills/create-photo-souvenir-shop/SKILL.md) · [设计方向](skills/create-photo-souvenir-shop/references/art-direction.md) · [素材清单格式](skills/create-photo-souvenir-shop/references/collection-schema.md) · [运行代码说明](skills/create-photo-souvenir-shop/references/runtime.md)。
+盘子、碟子、桌布和笔通过自定义模型接口由 Agent 设计。清单需明确 `gifts` 和 `scene`，交付前逐项检查 11 类商品；已有生成网站不受影响。
+
+详细说明：[Skill](skills/create-photo-souvenir-shop/SKILL.md) · [品质制作流程](skills/create-photo-souvenir-shop/references/quality-workflow.md) · [空间设计](skills/create-photo-souvenir-shop/references/shop-design.md) · [设计方向](skills/create-photo-souvenir-shop/references/art-direction.md) · [素材清单格式](skills/create-photo-souvenir-shop/references/collection-schema.md) · [运行代码说明](skills/create-photo-souvenir-shop/references/runtime.md)。
 
 ## 本地预览
 
@@ -59,7 +63,16 @@ node --test tests/souvenir-reader.test.mjs
 node skills/create-photo-souvenir-shop/scripts/validate_shop.mjs
 ```
 
-测试覆盖联系表分页、照片方向、裁图、不同素材规模、可选画册和立体礼品、来源关联、几何、拾取与实例优化。自动检查不能替代对生成作品的审美判断和浏览器交互检查。
+测试覆盖联系表分页、照片方向、裁图、不同素材规模、可选画册和立体礼品、来源关联、几何、拾取与实例优化。自动检查不能替代对生成作品的审美判断和浏览器交互检查。仓库里的几何示例只验证功能，不代表最终审美目标。
+
+生成的网站可用 Playwright/Chromium 输出真实成品截图并核查：
+
+```bash
+node skills/create-photo-souvenir-shop/scripts/render_review.mjs /path/to/shop /path/to/new-review
+python3 skills/create-photo-souvenir-shop/scripts/audit_collection.py /path/to/shop --review /path/to/new-review --final
+```
+
+检查区分设计款数与陈列库存，识别完全重复的立体造型，并在代码或素材改变后提示截图已过期。必须实际看图、改进弱项、重新验收；通过数值检查不等于审美合格。图像生成与浏览器依赖配置见品质制作流程。
 
 ## 授权
 

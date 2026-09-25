@@ -94,7 +94,17 @@ for (const item of shop.objects) {
   ids.add(item.userData.id);
   const d = item.userData.definition;
   const b = new T.Box3().setFromObject(item, true);
-  assert(b.max.y < 3.3 && b.min.y > -0.1, "Item inside room " + item.name);
+  const r = c.scene.room;
+  assert(
+    !b.isEmpty() &&
+      b.max.y < r.height + 0.05 &&
+      b.min.y > -0.1 &&
+      b.min.x > -r.width / 2 - 0.05 &&
+      b.max.x < r.width / 2 + 0.05 &&
+      b.min.z > -r.depth / 2 - 0.05 &&
+      b.max.z < r.depth / 2 + 0.05,
+    "Item inside room " + item.name,
+  );
   if (d.personal || d.tripRelated) {
     assert(sources.has(d.sourcePhoto), "Known source " + item.name);
     let print = false;
@@ -102,7 +112,8 @@ for (const item of shop.objects) {
       if (
         m.isMesh &&
         (m.material.map?.userData.tripArtwork ||
-          m.material.map?.userData.tripOrnaments)
+          m.material.map?.userData.tripOrnaments ||
+          m.userData.sourcePhoto === d.sourcePhoto)
       )
         print = true;
     });
@@ -119,21 +130,69 @@ shop.room.traverse((m) => {
       "Finite mesh " + m.name,
     );
 });
-assert.equal(shop.postcardWall.length, c.artworks.length);
+const selectedWall = c.scene.placements.filter((p) => p.wall);
+assert.equal(shop.postcardWall.length, selectedWall.length);
 assert.equal(
   new Set(shop.postcardWall.map((o) => o.userData.type)).size,
-  c.artworks.length,
-  "No repeated artwork on postcard wall",
+  selectedWall.length,
+  "No repeated main-wall artwork",
 );
-assert(shop.mobiles.length >= 100, "Layered hanging collection");
+assert.equal(
+  shop.mobiles.length,
+  c.scene.placements.filter((p) => p.type.startsWith("mobile-")).length,
+);
 assert(
   shop.tripRelated.length / shop.objects.length >= 0.7,
-  "At least 70% source-derived placed objects",
+  "At least 70% source-derived merchandise",
 );
 assert.equal(
   shop.personal.length,
-  c.gifts.length + c.crafts.length + Number(!!c.book),
+  c.scene.placements.filter(
+    (p) =>
+      p.type.startsWith("memory-") ||
+      p.type.startsWith("craft-") ||
+      p.type === "journey-photobook",
+  ).length,
 );
+// All navigation stops must connect to the entrance through walkable floor, not just land on isolated free spots.
+const step = 0.2,
+  r = c.scene.room,
+  nx = Math.ceil(r.width / step),
+  nz = Math.ceil(r.depth / step);
+const point = (x, z) => [
+  -r.width / 2 + (x + 0.5) * step,
+  -r.depth / 2 + (z + 0.5) * step,
+];
+const cell = (p) => [
+  Math.floor((p[0] + r.width / 2) / step),
+  Math.floor((p[2] + r.depth / 2) / step),
+];
+const start = cell(ZONES.overview.pos),
+  queue = [start],
+  reachable = new Set([start.join(",")]);
+for (let i = 0; i < queue.length; i++) {
+  const [x, z] = queue[i];
+  for (const [dx, dz] of [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ]) {
+    const a = x + dx,
+      b = z + dz,
+      key = [a, b].join(",");
+    if (a < 0 || a >= nx || b < 0 || b >= nz || reachable.has(key)) continue;
+    const [wx, wz] = point(a, b),
+      [px, pz] = point(x, z);
+    if (
+      positionAllowed(wx, wz, shop.colliders) &&
+      positionAllowed((wx + px) / 2, (wz + pz) / 2, shop.colliders)
+    ) {
+      reachable.add(key);
+      queue.push([a, b]);
+    }
+  }
+}
 const ray = new T.Raycaster(),
   camera = new T.PerspectiveCamera(62, 1.6, 0.04, 40);
 const owner = (mesh) => {
@@ -153,6 +212,7 @@ for (const [name, z] of Object.entries(ZONES)) {
     positionAllowed(z.pos[0], z.pos[2], shop.colliders),
     "Walkable " + name,
   );
+  assert(reachable.has(cell(z.pos).join(",")), "Connected aisle to " + name);
   camera.position.set(...z.pos);
   camera.lookAt(...z.target);
   camera.updateMatrixWorld(true);
@@ -165,6 +225,25 @@ for (const [name, z] of Object.entries(ZONES)) {
         .find((h) => h.object.isMesh);
       if (hit && owner(hit.object)) picked.add(owner(hit.object).userData.id);
     }
+  // Small merchandise can fall between screen-grid samples. Aim at its projected center too.
+  for (const item of shop.objects) {
+    const center = new T.Box3()
+      .setFromObject(item, true)
+      .getCenter(new T.Vector3())
+      .project(camera);
+    if (
+      Math.abs(center.x) > 1 ||
+      Math.abs(center.y) > 1 ||
+      center.z > 1 ||
+      center.z < -1
+    )
+      continue;
+    ray.setFromCamera(new T.Vector2(center.x, center.y), camera);
+    const hit = ray
+      .intersectObject(shop.room, true)
+      .find((h) => h.object.isMesh);
+    if (hit && owner(hit.object)) picked.add(owner(hit.object).userData.id);
+  }
   assert(picked.size > 0, "Pickable zone " + name);
 }
 if (c.book) {
@@ -192,16 +271,30 @@ for (const [i, o] of shop.objects.entries()) {
   );
 }
 const batching = instanceRepeatedItems(shop.room, shop.objects);
-assert(batching.drawCallsSaved > 200);
-const batch = shop.room.children.find((o) => o.isInstancedMesh),
-  item = batch.userData.giftInstances[0];
-assert.equal(instanceOwner({ object: batch, instanceId: 0 }), item);
-showItem(item, false);
-assert.equal(item.visible, false);
-showItem(item, true);
-assert.equal(item.visible, true);
-prepareInspectionClone(item.clone(true)).traverse((m) =>
-  assert.equal(m.layers.mask, 1),
+// A sparse collection need not create a batch. Check instance identity whenever batching is possible.
+const batch = shop.room.children.find((o) => o.isInstancedMesh);
+if (batch) {
+  const item = batch.userData.giftInstances[0];
+  assert.equal(instanceOwner({ object: batch, instanceId: 0 }), item);
+  showItem(item, false);
+  assert.equal(item.visible, false);
+  showItem(item, true);
+  assert.equal(item.visible, true);
+  prepareInspectionClone(item.clone(true)).traverse((m) =>
+    assert.equal(m.layers.mask, 1),
+  );
+}
+const postcardDesigns = new Set(
+  shop.objects.flatMap((o) => {
+    const d = o.userData.definition;
+    if (o.userData.type.startsWith("card-")) return [c.artworks[d.artIndex].id];
+    return d.family === "postcard" || d.kind === "postcards" ? [d.artwork] : [];
+  }),
+);
+const authoredModels = new Set(
+  shop.personal
+    .filter((o) => o.userData.definition.model)
+    .map((o) => o.userData.type),
 );
 console.log(
   JSON.stringify({
@@ -210,7 +303,10 @@ console.log(
     photoDerivedPercent: Math.round(
       (shop.tripRelated.length / shop.objects.length) * 100,
     ),
+    // Legacy field counts curated card-N wall placements only.
     uniquePostcards: shop.postcardWall.length,
+    postcardDesigns: postcardDesigns.size,
+    authoredModels: authoredModels.size,
     hanging: shop.mobiles.length,
     drawCallsSaved: batching.drawCallsSaved,
     modules: visited.size,

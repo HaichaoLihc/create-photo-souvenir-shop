@@ -1,0 +1,36 @@
+# Spatial art direction
+
+**Open all five photographs before designing.** Use the model's own knowledge of architecture, interior design, spatial composition, material construction and lighting to interpret them. Captions alone are insufficient. The photos show partial views, not measured plans; borrow visible relationships without inventing their unseen architecture. Personal photos determine the new shop's character.
+
+## Read the references
+
+| Photograph | Space and arrangement | Color, material and light |
+| --- | --- | --- |
+| [1 · Teal and timber](shop-photos/01-teal-timber.png) | Tall perimeter shelving backs lower, overlapping islands. Slats and frames establish vertical rhythm; round plates, baskets and shades soften it. Stock is grouped at several heights rather than spread evenly. | Deep teal grounds pale wood and black metal. Woven shades produce warm focal pools; the small red stand is a concentrated accent. |
+| [2 · Colorful paper shop](shop-photos/02-colorful-paper-shop.jpg) | A narrow browsing route passes stepped displays. Hanging cutouts, a mug rail and wall cards occupy different depth/height layers. Local rows hold stock while the whole composition stays varied. | Quiet dark walls and wood support many bright products. Repeated color patches connect ceiling to merchandise; spotlights and cooler light at the back add depth. |
+| [3 · Collected household goods](shop-photos/03-collected-household-goods.png) | Different furniture widths, crate risers and foreground stock create staggered silhouettes and partial reveals. Folded cloth, upright books and vessel groups alternate low and tall. | Muted cream, aged timber, black frames and geometric floor tiles form a material hierarchy. Local warm illumination leaves some recesses darker. |
+| [4 · Daylit craft shop](shop-photos/04-daylit-craft-shop.png) | A substantial long table anchors many small compositions. Low risers and slender vessels make a varied skyline; oversized paper lanterns lower the perceived ceiling. Shallow wall ledges leave the central volume legible. | Natural wood, pale walls, glass cases and small dark objects balance by visual weight. Strong shopfront daylight crosses warm lamp light; side lighting describes edges and texture. |
+| [5 · Textile workshop](shop-photos/05-textile-workshop.png) | Repeated trestles give structural order. Draped cloth makes an undulating upper plane; overhead pattern density is balanced by open floor and long working surfaces. | Orange frames and pendants recur through depth against a white shell. Patterned textiles carry most color complexity; directional shadows reinforce the light structure. |
+
+Adapt selected relationships; do not trace one floor plan or reproduce a whole palette, fixture layout and prop arrangement. Reference products/signage are not the user's memories. State briefly what was borrowed and what changed.
+
+## Design with architectural judgment
+
+- **Plan and section together.** Establish room proportions, threshold, openings, ceiling height, an entry focal point and the browsing route before placing stock. Use a readable sequence of approach, discovery and pause, with foreground/middle/background views. Offset islands where useful; keep the focal display and window light visible. Main aisles should have roughly 0.8–1.2 m clear, with enough approach space to inspect products. Do not force symmetry or winding routes.
+- **Composed asymmetry.** Build balanced groups with a dominant piece, supporting pieces and a low base. Alternate standing, leaning, hanging, nested, stacked and folded presentations. Vary cluster width, depth and skyline; leave small purposeful gaps between dense groups. Local shelves/hooks may align, but the entire room must not become one evenly spaced grid. Random yaw/jitter is not spatial composition. Keep a representative of each design visible and reachable.
+- **Hierarchy at three scales.** Compose the room, each fixture, then each product group. Let large calm surfaces support small intricate goods. Use partial overlap and staggered heights to reveal depth without burying merchandise. Give high-density displays quieter neighboring surfaces; empty aisles and breathing gaps balance plentiful stock. Avoid giant empty cabinets, identical islands and eleven isolated category pedestals.
+- **Color as a sequence.** Derive a dominant field, supporting material tones and selective accents from the photos. Repeat an accent at separated depths to guide the eye; vary its area and intensity. Control the rhythm of light/dark, opaque/transparent and matte/gloss. Not every product or fixture should demand equal attention. Never impose beige minimalism, gold or marble as a shortcut to sophistication.
+- **Material and construction credibility.** Choose a coherent structural language and believable thicknesses, spans and supports. Model useful details: a shelf bracket, recessed plinth, frame rebate, wood end grain, glazing thickness, cloth seam or softly worn edge. Materials need distinct roughness and plausible joins. Add detail where it explains fabrication or catches light; do not compensate for a weak plan with decorative noise or a room of generic boxes.
+- **Light with a cause.** Establish an identifiable daylight opening and complementary ambient, task and accent light where appropriate. Let directional light reveal form, grazing light reveal texture, and softer fill keep shadowed stock readable. Use contact shadows to ground objects and restrained specular highlights to distinguish metal, glaze, paper and cloth. Place fixtures intentionally; avoid uniform front lighting, crushed shadows, bleached highlights, theatrical spotlights on every object and blanket orange glow. Adapt warmth/contrast to the photo mood.
+
+Use these principles to author actual geometry, placements, materials and lights. Extend the runtime when its primitives cannot express the concept. A seed may help choose among compatible compositions or add restrained variation after the layout works; it cannot design the room by scattering objects.
+
+## Reusable design prompt
+
+> 以优秀独立礼品店与建筑室内作品的完成度设计这间店。主动运用空间比例、平面与剖面、动线、视线、构造和光环境知识，把用户照片转译成具体的空间语言。入口有视觉重心，行进中有遮露与发现，前中后景互相呼应。陈列采用有秩序的不对称：成组、错层、前后叠置，局部对齐，整体疏密有致；让密集小物与安静的大面、留白和通道相互平衡。色彩有主次与跨空间的呼应，材质有真实厚度、连接和触感。让有方向的自然光与克制的局部灯光共同塑造体积、纹理和阴影。商品丰富而款式分明，每一组都经过构图。借鉴参考照片的空间关系，重新组织建筑与陈列，避免整齐排队、机械网格、随机撒放，以及只靠换贴图和装饰堆砌营造设计感。
+
+## Final spatial check
+
+Inspect the actual scene from the entry, a cross-aisle view, the reverse view and close to a display. First judge massing/silhouette without detailed artwork: is there a focal hierarchy, believable scale, varied skyline and clear route? Then check color balance, material joins, object support, light direction and readable shadows. A room of evenly spaced identical fixtures fails even when its products are numerous; random scatter also fails. Recompose the weak area and recheck it. Do not lower the standard to save design/modeling effort, and do not treat passing geometry checks or a beautiful concept image as evidence that the implemented room works.
+
+The five user-supplied photos are visual references, outside the repository's MIT code license. They are not automatically copied into generated sites. Original photographers/source URLs were not supplied.

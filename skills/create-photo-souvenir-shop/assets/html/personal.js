@@ -11,12 +11,17 @@ import {
   textured,
   cream,
   silver,
+  postcardBack,
 } from "./materials.js";
 import { COLLECTION } from "./collection.js";
 import { TRIP_ART } from "./trip-art.js";
 import { makeMug } from "./mug.js";
 export { makeMug } from "./mug.js";
+import { EXTENDED_FAMILIES, buildExtended } from "./extended-products.js";
+import { buildCustomProduct } from "./custom-shop.js";
 export const FAMILIES = [
+  ...EXTENDED_FAMILIES,
+  "custom",
   "postcards",
   "magnet",
   "keychain",
@@ -29,11 +34,11 @@ export const FAMILIES = [
   "journal",
 ];
 export const PERSONAL_CATALOG = Object.fromEntries(
-  COLLECTION.gifts.map((gift) => {
+  COLLECTION.gifts.map((gift, index) => {
     const artIndex = TRIP_ART.findIndex((a) => a.id === gift.artwork);
     const art = TRIP_ART[artIndex];
     return [
-      "memory-" + gift.kind,
+      "memory-" + (gift.id || gift.kind),
       {
         ...gift,
         slug: gift.kind,
@@ -44,7 +49,7 @@ export const PERSONAL_CATALOG = Object.fromEntries(
         artIndex,
         sourcePhoto: art.photo,
         prototype: art.src,
-        number: FAMILIES.indexOf(gift.kind) + 1,
+        number: index + 1,
       },
     ];
   }),
@@ -82,7 +87,12 @@ export function buildPersonal(g, type, textures) {
   const d = PERSONAL_CATALOG[type],
     tex = textures["art-" + d.artIndex];
   const accent = mat(d.color || COLLECTION.palette[0], 0.28);
-  if (d.slug === "mug") {
+  if (d.model || d.slug === "custom") {
+    if (!buildCustomProduct(g, d, textures))
+      throw new Error("Authored product has no maker: " + d.id);
+  } else if (buildExtended(g, d, tex, accent)) {
+    // Authored form, material and artwork are independent choices.
+  } else if (d.slug === "mug") {
     makeMug(g, cream, accent, tex);
   } else if (d.slug === "postcards") {
     for (let i = 0; i < 3; i++) {
@@ -91,14 +101,8 @@ export function buildPersonal(g, type, textures) {
       card.position.set((i - 1) * 0.085, i === 1 ? 0.055 : 0, -0.009 * i);
       card.rotation.z = (i - 1) * -0.13;
       box(card, 0.18, 0.27, 0.004, 0, 0.135, 0, cream);
-      panel(
-        card,
-        textures["art-" + ((d.artIndex + i) % TRIP_ART.length)],
-        0.164,
-        0.244,
-        0.0025,
-        0.135,
-      );
+      panel(card, tex, 0.164, 0.244, 0.0025, 0.135);
+      postcardBack(card, 0.18, 0.27, 0.135, -0.0026, d.name);
     }
   } else if (d.slug === "magnet") {
     silhouette(g, d, 0.27, 0.23, 0.018, accent);
@@ -129,6 +133,7 @@ export function buildPersonal(g, type, textures) {
         0.184 + i * 0.016,
         0,
         silver,
+        postcardBack,
         false,
       );
       link.rotation.y = ((i % 2) * Math.PI) / 2;
@@ -204,6 +209,7 @@ export function buildPersonal(g, type, textures) {
       ],
       0.002,
       silver,
+      postcardBack,
     );
     box(g, 0.012, 0.018, 0.017, -0.047, 0.078, -0.012, silver);
     ring(g, 0.007, 0.002, 0.045, 0.078, -0.016, silver, false);

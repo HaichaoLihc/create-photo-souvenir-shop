@@ -223,3 +223,85 @@ export const cream = mat("#f5efe0", 0.27),
   navy = mat("#163743", 0.3),
   gold = mat("#b89c59", 0.25, 0.65),
   silver = mat("#ccd0cc", 0.22, 0.85);
+
+// Grain is neutral so the author's timber color survives. Textures are cached per orientation.
+const timberCache = new Map();
+export function timber(color, axis = "y") {
+  const key = color + axis;
+  if (!timberCache.has(key)) {
+    const map = canvasTexture(128, 512, (c) => {
+      c.fillStyle = "#eeeeee";
+      c.fillRect(0, 0, 128, 512);
+      for (let i = 0; i < 260; i++) {
+        const x = (i * 47.137) % 128;
+        c.strokeStyle = i % 3 ? "rgba(35,30,22,.06)" : "rgba(255,255,255,.28)";
+        c.lineWidth = 0.3 + (i % 5) * 0.15;
+        c.beginPath();
+        c.moveTo(x, 0);
+        for (let y = 0; y <= 512; y += 16)
+          c.lineTo(x + Math.sin(y * 0.023 + i) * 1.7, y);
+        c.stroke();
+      }
+    });
+    map.wrapS = map.wrapT = T.RepeatWrapping;
+    map.center.set(0.5, 0.5);
+    map.rotation = axis === "x" ? Math.PI / 2 : 0;
+    timberCache.set(
+      key,
+      new T.MeshStandardMaterial({ color, map, roughness: 0.64 }),
+    );
+  }
+  return timberCache.get(key);
+}
+export function millwork(p, w, h, d, x, y, z, material) {
+  const bevel = Math.min(0.002, w * 0.05, h * 0.05, d * 0.05);
+  const geometry = new T.ExtrudeGeometry(
+    roundedShape(w - 2 * bevel, h - 2 * bevel, bevel),
+    {
+      depth: d - 2 * bevel,
+      steps: 1,
+      curveSegments: 3,
+      bevelEnabled: true,
+      bevelSize: bevel,
+      bevelThickness: bevel,
+      bevelSegments: 2,
+    },
+  );
+  geometry.translate(0, -(h - 2 * bevel) / 2, -(d - 2 * bevel) / 2);
+  return mesh(p, geometry, material, x, y, z);
+}
+
+// A real second face for paper goods; front art never appears mirrored on the back.
+const reverseCache = new Map();
+export function postcardBack(parent, w, h, y, z, title = "") {
+  const key = title + ":" + (w / h).toFixed(3);
+  if (!reverseCache.has(key))
+    reverseCache.set(
+      key,
+      canvasTexture(600, Math.round((600 * h) / w), (c, cw, ch) => {
+        c.fillStyle = "#f5efdf";
+        c.fillRect(0, 0, cw, ch);
+        c.strokeStyle = "#b0a894";
+        c.lineWidth = 1.5;
+        c.beginPath();
+        c.moveTo(cw * 0.5, ch * 0.14);
+        c.lineTo(cw * 0.5, ch * 0.85);
+        c.stroke();
+        c.strokeRect(cw * 0.79, ch * 0.1, cw * 0.12, ch * 0.19);
+        for (let i = 0; i < 4; i++) {
+          c.beginPath();
+          c.moveTo(cw * 0.56, ch * (0.52 + i * 0.095));
+          c.lineTo(cw * 0.92, ch * (0.52 + i * 0.095));
+          c.stroke();
+        }
+        c.fillStyle = "#797364";
+        c.font = "12px Georgia";
+        c.fillText(title.slice(0, 40), cw * 0.07, ch * 0.92, cw * 0.38);
+      }),
+    );
+  const o = plane(parent, w, h, reverseCache.get(key), 0, y, z);
+  o.rotation.y = Math.PI;
+  o.material = o.material.clone();
+  o.material.side = T.FrontSide;
+  return o;
+}
